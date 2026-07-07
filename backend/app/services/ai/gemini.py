@@ -27,9 +27,28 @@ class GeminiProvider(AIProvider):
             
         for msg in messages:
             role = "user" if msg["role"] == "user" else "model"
+            parts = []
+            if isinstance(msg["content"], list):
+                for part in msg["content"]:
+                    if part.get("type") == "text":
+                        parts.append({"text": part.get("text", "")})
+                    elif part.get("type") == "image_url":
+                        url_data = part.get("image_url", {}).get("url", "")
+                        if url_data.startswith("data:"):
+                            header, base64_data = url_data.split(";base64,")
+                            mimeType = header.split("data:")[1]
+                            parts.append({
+                                "inlineData": {
+                                    "mimeType": mimeType,
+                                    "data": base64_data
+                                }
+                            })
+            else:
+                parts.append({"text": msg["content"]})
+                
             contents.append({
                 "role": role,
-                "parts": [{"text": msg["content"]}]
+                "parts": parts
             })
         return contents
 

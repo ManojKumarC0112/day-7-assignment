@@ -93,7 +93,14 @@ async def unified_chatEndpoint(
         mime_type = file.content_type or ""
         if mime_type.startswith("image/"):
             is_image = True
-            target_model = "meta-llama/llama-4-scout-17b-16e-instruct"
+            if selected_prov == "gemini":
+                target_model = "gemini-2.5-flash"
+            elif selected_prov == "nvidia":
+                target_model = "meta-llama/llama-4-scout-17b-16e-instruct"
+            elif selected_prov == "groq":
+                target_model = "llama-3.2-11b-vision-preview"
+            else:
+                target_model = "gemini-2.5-flash"
             # Read image and convert to base64
             file_bytes = await file.read()
             base64_image = base64.b64encode(file_bytes).decode("utf-8")
@@ -155,10 +162,14 @@ async def unified_chatEndpoint(
         
         if compare_mode == "true":
             # Run comparison in parallel for all three providers
+            gemini_model = "gemini-2.5-flash"
+            groq_model = "llama-3.2-11b-vision-preview" if is_image else "llama-3.3-70b-versatile"
+            nvidia_model = "meta-llama/llama-4-scout-17b-16e-instruct" if is_image else "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning"
+            
             tasks = [
-                run_provider_model("gemini", "gemini-2.5-flash", groq_messages, system_prompt if not context_text else system_prompt),
-                run_provider_model("groq", "llama-3.3-70b-versatile", groq_messages, system_prompt if not context_text else system_prompt),
-                run_provider_model("nvidia", "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning", groq_messages, system_prompt if not context_text else system_prompt)
+                run_provider_model("gemini", gemini_model, groq_messages, system_prompt),
+                run_provider_model("groq", groq_model, groq_messages, system_prompt),
+                run_provider_model("nvidia", nvidia_model, groq_messages, system_prompt)
             ]
             results = await asyncio.gather(*tasks)
             yield json.dumps({"type": "compare", "results": results}) + "\n"
