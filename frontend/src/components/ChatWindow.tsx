@@ -122,56 +122,72 @@ export default function ChatWindow() {
                 </div>
 
                 {/* Model Selector Bar */}
-                <div className="flex flex-wrap items-center gap-4 text-xs">
-                    {/* Compare Checkbox */}
-                    <label className={`flex items-center gap-2 font-medium cursor-pointer py-1.5 px-3 rounded-xl transition-all ${isLight ? 'hover:bg-slate-200/50 text-slate-650' : 'hover:bg-white/5 text-slate-300'
+                <div className="flex items-center flex-wrap gap-2 text-xs">
+                    <div className={`flex items-center p-0.5 rounded-xl border transition-all ${isLight
+                            ? 'bg-slate-200/60 border-slate-300'
+                            : 'bg-white/5 border-white/10'
                         }`}>
-                        <input
-                            type="checkbox"
-                            checked={compareMode}
-                            onChange={(e) => setCompareMode(e.target.checked)}
-                            className="rounded border-white/20 text-nova-accent focus:ring-nova-accent/30"
-                        />
-                        <span className="flex items-center gap-1">⭐ Compare Models</span>
-                    </label>
+                        <button
+                            onClick={() => {
+                                setCompareMode(false);
+                                setProvider('gemini');
+                            }}
+                            className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${!compareMode && selectedProvider === 'gemini'
+                                    ? (isLight ? 'bg-white text-slate-800 shadow-sm' : 'bg-nova-accent text-white shadow-lg')
+                                    : (isLight ? 'text-slate-650 hover:text-slate-900' : 'text-slate-400 hover:text-white')
+                                }`}
+                        >
+                            Gemini
+                        </button>
+                        <button
+                            onClick={() => {
+                                setCompareMode(false);
+                                setProvider('groq');
+                            }}
+                            className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${!compareMode && selectedProvider === 'groq'
+                                    ? (isLight ? 'bg-white text-slate-800 shadow-sm' : 'bg-nova-accent text-white shadow-lg')
+                                    : (isLight ? 'text-slate-650 hover:text-slate-900' : 'text-slate-400 hover:text-white')
+                                }`}
+                        >
+                            Groq
+                        </button>
+                        <button
+                            onClick={() => {
+                                setCompareMode(false);
+                                setProvider('nvidia');
+                            }}
+                            className={`px-3 py-1.5 rounded-lg font-semibold transition-all ${!compareMode && selectedProvider === 'nvidia'
+                                    ? (isLight ? 'bg-white text-slate-800 shadow-sm' : 'bg-nova-accent text-white shadow-lg')
+                                    : (isLight ? 'text-slate-650 hover:text-slate-900' : 'text-slate-400 hover:text-white')
+                                }`}
+                        >
+                            NVIDIA
+                        </button>
+
+                        <div className={`w-[1px] h-4 mx-1.5 ${isLight ? 'bg-slate-300' : 'bg-white/10'}`} />
+
+                        <button
+                            onClick={() => setCompareMode(true)}
+                            className={`px-3 py-1.5 rounded-lg font-semibold flex items-center gap-1 transition-all ${compareMode
+                                    ? (isLight ? 'bg-amber-100 text-amber-800 shadow-sm border border-amber-250/20' : 'bg-amber-500/20 text-amber-350 border border-amber-500/30')
+                                    : (isLight ? 'text-slate-650 hover:text-slate-900' : 'text-slate-400 hover:text-white')
+                                }`}
+                        >
+                            ✨ Compare All
+                        </button>
+                    </div>
 
                     {!compareMode && (
-                        <>
-                            {/* Provider Select */}
-                            <div className="flex items-center gap-1.5">
-                                <span className={`font-semibold uppercase text-[9px] tracking-wider ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>Provider</span>
-                                <select
-                                    value={selectedProvider}
-                                    onChange={(e) => setProvider(e.target.value as any)}
-                                    className={`px-3 py-1.5 border rounded-xl text-xs font-semibold outline-none cursor-pointer transition-all ${isLight
-                                        ? 'bg-slate-200/80 border-slate-350 text-slate-800 focus:border-slate-500'
-                                        : 'bg-white/5 border-white/10 text-slate-200 focus:border-nova-accent/40'
-                                        }`}
-                                >
-                                    <option value="gemini">Gemini</option>
-                                    <option value="groq">Groq</option>
-                                    <option value="nvidia">NVIDIA</option>
-                                </select>
-                            </div>
-
-                            {/* Model Badge */}
-                            <div className="flex items-center gap-1.5">
-                                <span className={`font-semibold uppercase text-[9px] tracking-wider ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>Model</span>
-                                <span className={`px-3 py-1.5 border rounded-xl text-xs font-semibold select-none ${isLight
-                                    ? 'bg-slate-200/50 border-slate-350 text-slate-700'
-                                    : 'bg-white/5 border-white/10 text-slate-300'
-                                    }`}>
-                                    {selectedProvider === 'gemini' && 'Gemini 2.5 Flash'}
-                                    {selectedProvider === 'groq' && 'Llama 3.3 70B'}
-                                    {selectedProvider === 'nvidia' && 'Nemotron 51B'}
-                                </span>
-                            </div>
-                        </>
-                    )}
-
-                    {compareMode && (
-                        <div className="flex items-center gap-1.5 text-nova-accent font-bold bg-nova-accent/15 px-3 py-1.5 rounded-xl border border-nova-accent/25">
-                            ⚔️ Compare: Gemini, Groq & NIM
+                        <div className={`flex items-center gap-1.5 px-3 py-1.5 border rounded-xl select-none ${isLight
+                                ? 'bg-slate-200/40 border-slate-300 text-slate-750'
+                                : 'bg-white/3 border-white/5 text-slate-400'
+                            }`}>
+                            <span className="font-semibold uppercase text-[9px] tracking-wider opacity-60">Model:</span>
+                            <span className="font-semibold text-[11px]">
+                                {selectedProvider === 'gemini' && 'Gemini 2.5 Flash'}
+                                {selectedProvider === 'groq' && 'Llama 3.3 70B'}
+                                {selectedProvider === 'nvidia' && 'Nemotron 3'}
+                            </span>
                         </div>
                     )}
                 </div>
