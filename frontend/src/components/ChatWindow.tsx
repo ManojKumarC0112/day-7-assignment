@@ -5,7 +5,7 @@ import ChatInput from './ChatInput';
 import { Sparkles, Trash2, Download, FileJson, FileText, ArrowRight } from 'lucide-react';
 
 export default function ChatWindow() {
-    const { messages, conversations, currentConversationId, deleteConversation, sendMessage } = useChatStore();
+    const { messages, conversations, currentConversationId, deleteConversation, sendMessage, isLight } = useChatStore();
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [showExportMenu, setShowExportMenu] = useState(false);
 
@@ -86,21 +86,34 @@ export default function ChatWindow() {
     ];
 
     return (
-        <div className="flex flex-col h-full relative z-10 w-full bg-nova-dark/40">
+        <div className={`flex flex-col h-full relative z-10 w-full transition-colors duration-350 ${isLight ? 'bg-slate-100/30 text-slate-800' : 'bg-nova-dark/40 text-slate-200'
+            }`}>
             {/* Elegant Header */}
-            <header className="flex items-center justify-between px-6 py-4 border-b border-white/5 bg-white/2 backdrop-blur-md">
+            <header className={`flex items-center justify-between px-6 py-4 border-b transition-colors duration-300 ${isLight ? 'border-slate-250 bg-slate-100/50 backdrop-blur-md' : 'border-white/5 bg-white/2 backdrop-blur-md'
+                }`}>
                 <div className="flex flex-col min-w-0 pr-4">
-                    <h2 className="text-sm font-semibold text-white truncate">
-                        {activeTitle}
-                    </h2>
-                    <span className="text-[10px] text-slate-500 tracking-wider uppercase font-medium">Nova Multimodal Engine</span>
+                    <div className="flex items-center gap-2.5">
+                        <h2 className={`text-sm font-semibold truncate ${isLight ? 'text-slate-800' : 'text-white'}`}>
+                            {activeTitle}
+                        </h2>
+                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold border transition-colors ${isLight
+                            ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
+                            : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
+                            }`}>
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-450 bg-emerald-400 animate-pulse" />
+                            llama-3.1-8b-instant
+                        </span>
+                    </div>
                 </div>
 
                 {currentConversationId && (
                     <div className="flex items-center gap-2 relative">
                         <button
                             onClick={() => setShowExportMenu(!showExportMenu)}
-                            className="p-2 text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-xl transition-colors flex items-center gap-1.5 text-xs font-medium"
+                            className={`p-2 border rounded-xl transition-all flex items-center gap-1.5 text-xs font-semibold ${isLight
+                                ? 'text-slate-650 bg-slate-200 hover:bg-slate-300 border-slate-300'
+                                : 'text-slate-400 hover:text-white bg-white/5 hover:bg-white/10 border-white/10'
+                                }`}
                             title="Export Conversation"
                         >
                             <Download size={14} />
@@ -108,17 +121,20 @@ export default function ChatWindow() {
                         </button>
 
                         {showExportMenu && (
-                            <div className="absolute right-12 top-0 mt-10 w-44 bg-nova-dark/95 border border-white/10 rounded-xl shadow-2xl backdrop-blur-xl z-50 overflow-hidden py-1 animate-fade-in">
+                            <div className={`absolute right-12 top-0 mt-10 w-44 border rounded-xl shadow-2xl backdrop-blur-xl z-50 overflow-hidden py-1 animate-fade-in ${isLight ? 'bg-slate-50 border-slate-300' : 'bg-nova-dark/95 border-white/10'
+                                }`}>
                                 <button
                                     onClick={exportAsMarkdown}
-                                    className="w-full px-4 py-2.5 text-left text-xs text-slate-300 hover:bg-white/10 flex items-center gap-2 transition-colors"
+                                    className={`w-full px-4 py-2.5 text-left text-xs flex items-center gap-2 transition-colors ${isLight ? 'text-slate-650 hover:bg-slate-200' : 'text-slate-300 hover:bg-white/10'
+                                        }`}
                                 >
                                     <FileText size={14} className="text-nova-accent" />
                                     Export Markdown
                                 </button>
                                 <button
                                     onClick={exportAsJSON}
-                                    className="w-full px-4 py-2.5 text-left text-xs text-slate-300 hover:bg-white/10 flex items-center gap-2 transition-colors"
+                                    className={`w-full px-4 py-2.5 text-left text-xs flex items-center gap-2 transition-colors ${isLight ? 'text-slate-650 hover:bg-slate-200' : 'text-slate-300 hover:bg-white/10'
+                                        }`}
                                 >
                                     <FileJson size={14} className="text-purple-400" />
                                     Export JSON
@@ -128,7 +144,10 @@ export default function ChatWindow() {
 
                         <button
                             onClick={handleDeleteActive}
-                            className="p-2 text-slate-400 hover:text-red-400 bg-white/5 hover:bg-red-500/10 border border-white/10 hover:border-red-500/20 rounded-xl transition-colors flex items-center gap-1.5 text-xs font-medium"
+                            className={`p-2 border rounded-xl transition-all flex items-center gap-1.5 text-xs font-semibold ${isLight
+                                ? 'text-red-650 hover:text-red-750 bg-red-50 hover:bg-red-100 border-red-200 hover:border-red-300'
+                                : 'text-slate-400 hover:text-red-400 bg-white/5 hover:bg-red-500/10 border-white/10 hover:border-red-500/20'
+                                }`}
                             title="Delete Chat"
                         >
                             <Trash2 size={14} />
@@ -141,13 +160,17 @@ export default function ChatWindow() {
             <div className="flex-1 overflow-y-auto scrollbar-hide" ref={scrollContainerRef}>
                 {messages.length === 0 ? (
                     <div className="min-h-full flex flex-col items-center justify-center p-6 md:p-8 animate-fade-in">
-                        <div className="h-16 w-16 bg-white/5 rounded-2xl flex items-center justify-center mb-6 shadow-2xl border border-white/5 text-nova-accent animate-pulse-subtle">
+                        <div className={`h-16 w-16 rounded-2xl flex items-center justify-center mb-6 shadow-2xl border text-nova-accent animate-pulse-subtle ${isLight ? 'bg-slate-200/80 border-slate-300' : 'bg-white/5 border-white/5'
+                            }`}>
                             <Sparkles size={32} />
                         </div>
-                        <h2 className="text-2xl md:text-3xl font-extrabold text-white mb-2 text-center bg-clip-text text-transparent bg-gradient-to-r from-white via-slate-200 to-nova-accent">
+                        <h2 className={`text-2xl md:text-3xl font-extrabold mb-2 text-center bg-clip-text text-transparent bg-gradient-to-r ${isLight
+                            ? 'from-slate-800 via-slate-700 to-indigo-600'
+                            : 'from-white via-slate-200 to-nova-accent'
+                            }`}>
                             Nova AI Assistant
                         </h2>
-                        <p className="text-slate-400 max-w-sm text-center text-sm mb-10">
+                        <p className={`max-w-sm text-center text-sm mb-10 ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
                             Upload files, analyze images, or ask questions instantly. How can I help you today?
                         </p>
 
@@ -157,17 +180,23 @@ export default function ChatWindow() {
                                 <button
                                     key={i}
                                     onClick={() => sendMessage(card.prompt, null)}
-                                    className="group text-left p-4 bg-white/5 hover:bg-white/10 border border-white/5 hover:border-white/10 rounded-2xl transition-all duration-300 transform hover:-translate-y-1 shadow-lg flex flex-col justify-between"
+                                    className={`group text-left p-5 border rounded-2xl transition-all duration-300 transform hover:-translate-y-1 shadow-md flex flex-col justify-between ${isLight
+                                        ? 'bg-slate-200/50 hover:bg-indigo-50/20 border-slate-300 hover:border-indigo-300 hover:shadow-indigo-500/5'
+                                        : 'bg-white/5 hover:bg-white/10 border-white/5 hover:border-nova-accent/20 hover:shadow-nova-accent/5'
+                                        }`}
                                 >
                                     <div>
-                                        <h3 className="text-sm font-semibold text-slate-200 group-hover:text-nova-accent transition-colors mb-1">
+                                        <h3 className={`text-sm font-semibold transition-colors mb-1 ${isLight
+                                            ? 'text-slate-850 group-hover:text-indigo-650'
+                                            : 'text-slate-200 group-hover:text-nova-accent'
+                                            }`}>
                                             {card.title}
                                         </h3>
-                                        <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                                        <p className={`text-xs line-clamp-2 leading-relaxed ${isLight ? 'text-slate-600' : 'text-slate-400'}`}>
                                             {card.desc}
                                         </p>
                                     </div>
-                                    <div className="flex items-center gap-1 text-[10px] text-nova-accent font-semibold mt-4 opacity-75 group-hover:opacity-100 transition-opacity">
+                                    <div className="flex items-center gap-1 text-[10px] text-nova-accent font-bold mt-4 opacity-75 group-hover:opacity-100 transition-opacity">
                                         Try this <ArrowRight size={10} className="transform group-hover:translate-x-1 transition-transform" />
                                     </div>
                                 </button>

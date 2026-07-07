@@ -31,7 +31,10 @@ body::before {
 
 @layer utilities {
   .glass-panel {
-    @apply bg-nova-card backdrop-blur-xl border border-nova-border shadow-2xl;
+    backdrop-filter: blur(var(--glass-blur, 16px));
+    background-color: rgba(var(--glass-bg-rgb, 15, 23, 42), var(--glass-opacity, 0.1));
+    border: 1px solid rgba(var(--glass-border-rgb, 255, 255, 255), var(--glass-border-opacity, 0.08));
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.15);
   }
 
   .scrollbar-hide::-webkit-scrollbar {

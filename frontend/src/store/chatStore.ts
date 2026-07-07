@@ -23,10 +23,12 @@ interface ChatState {
     glassOpacity: number;
     hasGlow: boolean;
     isLight: boolean;
+    activePreset: 'midnight' | 'ethereal' | 'nordic';
     setGlassBlur: (v: number) => void;
     setGlassOpacity: (v: number) => void;
     setHasGlow: (v: boolean) => void;
     setIsLight: (v: boolean) => void;
+    setPreset: (preset: 'midnight' | 'ethereal' | 'nordic') => void;
 
     fetchConversations: () => Promise<void>;
     searchConversations: (query: string) => Promise<void>;
@@ -49,6 +51,7 @@ export const useChatStore = create<ChatState>((set, get) => ({
     glassOpacity: Number(localStorage.getItem('glassOpacity') || '10'),
     hasGlow: localStorage.getItem('hasGlow') !== 'false',
     isLight: localStorage.getItem('isLight') === 'true',
+    activePreset: (localStorage.getItem('activePreset') || 'midnight') as 'midnight' | 'ethereal' | 'nordic',
 
     setGlassBlur: (glassBlur) => {
         localStorage.setItem('glassBlur', glassBlur.toString());
@@ -65,6 +68,29 @@ export const useChatStore = create<ChatState>((set, get) => ({
     setIsLight: (isLight) => {
         localStorage.setItem('isLight', isLight.toString());
         set({ isLight });
+    },
+    setPreset: (preset) => {
+        localStorage.setItem('activePreset', preset);
+        set({ activePreset: preset });
+        if (preset === 'midnight') {
+            set({ glassBlur: 16, glassOpacity: 10, hasGlow: true, isLight: false });
+            localStorage.setItem('glassBlur', '16');
+            localStorage.setItem('glassOpacity', '10');
+            localStorage.setItem('hasGlow', 'true');
+            localStorage.setItem('isLight', 'false');
+        } else if (preset === 'ethereal') {
+            set({ glassBlur: 8, glassOpacity: 5, hasGlow: false, isLight: false });
+            localStorage.setItem('glassBlur', '8');
+            localStorage.setItem('glassOpacity', '5');
+            localStorage.setItem('hasGlow', 'false');
+            localStorage.setItem('isLight', 'false');
+        } else if (preset === 'nordic') {
+            set({ glassBlur: 24, glassOpacity: 85, hasGlow: false, isLight: true });
+            localStorage.setItem('glassBlur', '24');
+            localStorage.setItem('glassOpacity', '85');
+            localStorage.setItem('hasGlow', 'false');
+            localStorage.setItem('isLight', 'true');
+        }
     },
 
     fetchConversations: async () => {

@@ -10,14 +10,8 @@ export default function Sidebar() {
         deleteConversation,
         clearChat,
         searchConversations,
-        glassBlur,
-        glassOpacity,
-        hasGlow,
-        isLight,
-        setGlassBlur,
-        setGlassOpacity,
-        setHasGlow,
-        setIsLight
+        activePreset,
+        setPreset
     } = useChatStore();
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -85,67 +79,43 @@ export default function Sidebar() {
             </div>
 
             {/* Theme & Glass Customizer Panel */}
-            <div className="border-t border-white/5 pt-4 mt-4 bg-white/2 p-3 rounded-2xl">
-                <div className="flex items-center justify-between mb-3">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">Aesthetics</span>
+            <div className="border-t border-white/5 pt-4 mt-auto bg-white/2 p-3 rounded-2xl">
+                <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider block mb-3">
+                    Aesthetic Presets
+                </span>
+                <div className="flex flex-col gap-2">
                     <button
-                        onClick={() => setIsLight(!isLight)}
-                        className={`text-[10px] border rounded-lg px-2 py-1 font-semibold transition-colors duration-200 ${isLight
-                                ? 'bg-slate-200 text-slate-900 border-slate-300 hover:bg-slate-300'
-                                : 'bg-white/5 text-slate-300 border-white/10 hover:bg-white/10'
+                        onClick={() => setPreset('midnight')}
+                        className={`w-full flex items-center justify-between px-3 py-2.5 text-xs font-semibold rounded-xl border transition-all duration-200 ${activePreset === 'midnight'
+                            ? 'bg-nova-accent/10 border-nova-accent/30 text-nova-accent shadow-sm'
+                            : 'bg-white/5 border-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200'
                             }`}
                     >
-                        {isLight ? "Light Mode" : "Dark Mode"}
+                        <span>🌌 Midnight Glow</span>
+                        {activePreset === 'midnight' && <span className="h-1.5 w-1.5 rounded-full bg-nova-accent animate-pulse" />}
                     </button>
-                </div>
 
-                <div className="flex flex-col gap-3">
-                    {/* Glass Blur Slider */}
-                    <div className="flex flex-col gap-1">
-                        <div className="flex justify-between text-[9px] text-slate-400 font-semibold">
-                            <span>Glass Blur</span>
-                            <span>{glassBlur}px</span>
-                        </div>
-                        <input
-                            type="range"
-                            min="4"
-                            max="32"
-                            value={glassBlur}
-                            onChange={(e) => setGlassBlur(Number(e.target.value))}
-                            className="w-full accent-nova-accent h-1 bg-white/10 rounded-lg appearance-none cursor-pointer"
-                        />
-                    </div>
+                    <button
+                        onClick={() => setPreset('ethereal')}
+                        className={`w-full flex items-center justify-between px-3 py-2.5 text-xs font-semibold rounded-xl border transition-all duration-200 ${activePreset === 'ethereal'
+                            ? 'bg-purple-500/10 border-purple-500/30 text-purple-400 shadow-sm'
+                            : 'bg-white/5 border-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200'
+                            }`}
+                    >
+                        <span>🌑 Ethereal Dark</span>
+                        {activePreset === 'ethereal' && <span className="h-1.5 w-1.5 rounded-full bg-purple-400 animate-pulse" />}
+                    </button>
 
-                    {/* Glass Opacity Slider */}
-                    <div className="flex flex-col gap-1">
-                        <div className="flex justify-between text-[9px] text-slate-400 font-semibold">
-                            <span>Glass Opacity</span>
-                            <span>{glassOpacity}%</span>
-                        </div>
-                        <input
-                            type="range"
-                            min="5"
-                            max="40"
-                            value={glassOpacity}
-                            onChange={(e) => setGlassOpacity(Number(e.target.value))}
-                            className="w-full accent-nova-accent h-1 bg-white/10 rounded-lg appearance-none cursor-pointer"
-                        />
-                    </div>
-
-                    {/* Glow Checkbox Toggle */}
-                    <div className="flex items-center justify-between py-0.5">
-                        <span className="text-[9px] text-slate-400 font-semibold">Ambient Glows</span>
-                        <button
-                            type="button"
-                            onClick={() => setHasGlow(!hasGlow)}
-                            className={`text-[9px] border roundedpx-2 py-0.5 rounded-md px-2 border-white/10 transition-colors ${hasGlow
-                                    ? 'bg-nova-accent/20 text-nova-accent border-nova-accent/30'
-                                    : 'bg-transparent text-slate-500'
-                                }`}
-                        >
-                            {hasGlow ? "Enabled" : "Disabled"}
-                        </button>
-                    </div>
+                    <button
+                        onClick={() => setPreset('nordic')}
+                        className={`w-full flex items-center justify-between px-3 py-2.5 text-xs font-semibold rounded-xl border transition-all duration-200 ${activePreset === 'nordic'
+                            ? 'bg-slate-200 border-slate-300 text-slate-800 shadow-sm'
+                            : 'bg-white/5 border-white/5 text-slate-400 hover:bg-white/10 hover:text-slate-200'
+                            }`}
+                    >
+                        <span>❄️ Nordic Light</span>
+                        {activePreset === 'nordic' && <span className="h-1.5 w-1.5 rounded-full bg-slate-500 animate-pulse" />}
+                    </button>
                 </div>
             </div>
         </aside>

@@ -147,8 +147,8 @@ export default function ChatInput() {
                         type="button"
                         onClick={isRecording ? stopRecording : startRecording}
                         className={`p-3 rounded-xl transition-all duration-200 ${isRecording
-                                ? 'bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse-subtle'
-                                : 'text-slate-400 hover:text-white hover:bg-white/10'
+                            ? 'bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse-subtle'
+                            : 'text-slate-400 hover:text-white hover:bg-white/10'
                             }`}
                         disabled={isTranscribing}
                         title={isRecording ? "Stop Recording" : "Voice Input"}
@@ -165,23 +165,42 @@ export default function ChatInput() {
                     />
                 </div>
 
-                <textarea
-                    value={text}
-                    onChange={(e) => setText(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    placeholder={
-                        isTranscribing
-                            ? "Transcribing voice message..."
-                            : isRecording
-                                ? "Listening... click square button to finish."
+                <div className="flex-1 relative flex items-center min-h-[52px]">
+                    <textarea
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                        onKeyDown={handleKeyDown}
+                        placeholder={
+                            isTranscribing
+                                ? "Transcribing voice message..."
                                 : isGenerating
                                     ? "Nova AI is typing..."
                                     : "Message Nova AI..."
-                    }
-                    disabled={isGenerating || isTranscribing}
-                    className="flex-1 max-h-48 min-h-[52px] bg-transparent resize-none outline-none py-3 px-2 text-slate-200 placeholder:text-slate-500 disabled:opacity-50"
-                    rows={1}
-                />
+                        }
+                        disabled={isGenerating || isTranscribing}
+                        className="w-full max-h-48 min-h-[52px] bg-transparent resize-none outline-none py-3 px-2 text-slate-200 placeholder:text-slate-500 disabled:opacity-50"
+                        rows={1}
+                    />
+
+                    {isRecording && (
+                        <div className="absolute inset-0 bg-slate-950/90 rounded-xl flex items-center justify-between px-4 border border-red-500/20 animate-pulse-subtle">
+                            <div className="flex items-center gap-3">
+                                <span className="relative flex h-2 w-2">
+                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                                    <span className="relative inline-flex rounded-full h-2 w-2 bg-red-500"></span>
+                                </span>
+                                <span className="text-xs font-semibold text-red-200">Listening contextually... Click stop to transcribe</span>
+                            </div>
+                            <div className="flex items-center gap-0.5">
+                                <span className="w-1 h-3 bg-red-400 rounded-full animate-bounce [animation-duration:0.8s]" />
+                                <span className="w-1 h-5 bg-red-400 rounded-full animate-bounce [animation-duration:1s]" />
+                                <span className="w-1 h-7 bg-red-400 rounded-full animate-bounce [animation-duration:1.2s]" />
+                                <span className="w-1 h-4 bg-red-400 rounded-full animate-bounce [animation-duration:0.7s]" />
+                                <span className="w-1 h-6 bg-red-400 rounded-full animate-bounce [animation-duration:0.9s]" />
+                            </div>
+                        </div>
+                    )}
+                </div>
 
                 <button
                     disabled={isGenerating || isTranscribing || (!text.trim() && !file)}

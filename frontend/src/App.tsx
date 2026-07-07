@@ -18,6 +18,9 @@ function App() {
       style={{
         '--glass-blur': `${glassBlur}px`,
         '--glass-opacity': `${glassOpacity / 100}`,
+        '--glass-bg-rgb': isLight ? '255, 255, 255' : '15, 23, 42',
+        '--glass-border-rgb': isLight ? '15, 23, 42' : '255, 255, 255',
+        '--glass-border-opacity': isLight ? '0.05' : '0.08',
       } as React.CSSProperties}
     >
       {/* Background Neon Glow Objects */}
