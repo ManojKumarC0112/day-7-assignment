@@ -3,6 +3,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api import chat, history
 from app.core.config import settings
 
+from app.database.database import engine, Base
+import app.models.models as models
+
+# Ensure all SQLite tables are automatically created on startup
+Base.metadata.create_all(bind=engine)
+
 app = FastAPI(title=settings.PROJECT_NAME, version=settings.VERSION)
 
 app.add_middleware(
