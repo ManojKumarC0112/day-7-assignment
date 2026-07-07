@@ -1,0 +1,29 @@
+services:
+  # Nova AI Python Backend Web Service
+  - type: web
+    name: nova-ai-backend
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: GROQ_API_KEY
+        sync: false
+      - key: NVIDIA_API_KEY
+        sync: false
+    rootDir: backend
+
+  # Nova AI Vite Static Frontend Site
+  - type: web
+    name: nova-ai-frontend
+    env: static
+    buildCommand: npm install && npm run build
+    publishPath: dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        fromService:
+          type: web
+          name: nova-ai-backend
+          property: host
+    rootDir: frontend

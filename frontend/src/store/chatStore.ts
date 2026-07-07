@@ -52,7 +52,7 @@ interface ChatState {
     setSidebarOpen: (sidebarOpen: boolean) => void;
 }
 
-const API_BASE = 'http://localhost:8000';
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
 export const useChatStore = create<ChatState>((set, get) => ({
     conversations: [],
