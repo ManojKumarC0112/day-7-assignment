@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useChatStore } from '../store/chatStore';
 import MessageBubble from './MessageBubble';
 import ChatInput from './ChatInput';
-import { Sparkles, Trash2, Download, FileJson, FileText, ArrowRight } from 'lucide-react';
+import { Sparkles, Trash2, Download, FileJson, FileText, ArrowRight, Menu } from 'lucide-react';
 
 export default function ChatWindow() {
     const {
@@ -15,7 +15,9 @@ export default function ChatWindow() {
         selectedProvider,
         compareMode,
         setProvider,
-        setCompareMode
+        setCompareMode,
+        sidebarOpen,
+        setSidebarOpen
     } = useChatStore();
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [showExportMenu, setShowExportMenu] = useState(false);
@@ -102,11 +104,20 @@ export default function ChatWindow() {
             {/* Elegant Header */}
             <header className={`flex items-center justify-between px-6 py-4 border-b flex-wrap gap-4 transition-colors duration-300 ${isLight ? 'border-slate-250 bg-slate-100/50 backdrop-blur-md' : 'border-white/5 bg-white/2 backdrop-blur-md'
                 }`}>
-                <div className="flex flex-col min-w-0">
-                    <div className="flex items-center gap-2.5">
-                        <h2 className={`text-sm font-bold truncate ${isLight ? 'text-slate-800' : 'text-white'}`}>
-                            {activeTitle}
-                        </h2>
+                <div className="flex items-center gap-2 min-w-0">
+                    <button
+                        onClick={() => setSidebarOpen(!sidebarOpen)}
+                        className="md:hidden p-2 text-slate-400 hover:text-white rounded-xl hover:bg-white/10 transition-colors mr-1"
+                        title="Toggle Sidebar"
+                    >
+                        <Menu size={20} />
+                    </button>
+                    <div className="flex flex-col min-w-0">
+                        <div className="flex items-center gap-2.5">
+                            <h2 className={`text-sm font-bold truncate ${isLight ? 'text-slate-800' : 'text-white'}`}>
+                                {activeTitle}
+                            </h2>
+                        </div>
                     </div>
                 </div>
 

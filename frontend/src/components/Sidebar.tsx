@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { PlusCircle, MessageSquare, Trash2, Search } from 'lucide-react';
+import { PlusCircle, MessageSquare, Trash2, Search, X } from 'lucide-react';
 import { useChatStore } from '../store/chatStore';
 
 export default function Sidebar() {
@@ -11,7 +11,9 @@ export default function Sidebar() {
         clearChat,
         searchConversations,
         activePreset,
-        setPreset
+        setPreset,
+        sidebarOpen,
+        setSidebarOpen
     } = useChatStore();
     const [searchQuery, setSearchQuery] = useState('');
 
@@ -20,13 +22,26 @@ export default function Sidebar() {
         clearChat();
         setSearchQuery('');
         searchConversations('');
+        setSidebarOpen(false); // Close on mobile when creating chat
     };
 
     return (
-        <aside className="w-72 h-full p-4 flex flex-col bg-transparent shrink-0">
-            <h1 className="text-2xl font-bold mb-6 flex items-center gap-2 text-nova-accent">
-                🔥 Nova AI
-            </h1>
+        <aside className={`w-72 h-full p-4 flex flex-col shrink-0 fixed md:relative inset-y-0 left-0 z-50 transition-transform duration-300 md:translate-x-0 shadow-2xl md:shadow-none ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'
+            } ${activePreset === 'nordic'
+                ? 'bg-slate-50 border-r border-slate-300 text-slate-800'
+                : 'bg-slate-950/95 border-r border-white/5 md:bg-transparent md:border-r-0 text-slate-200'
+            }`}>
+            <div className="flex items-center justify-between mb-6">
+                <h1 className="text-2xl font-bold flex items-center gap-2 text-nova-accent animate-fade-in-slow">
+                    🔥 Nova AI
+                </h1>
+                <button
+                    onClick={() => setSidebarOpen(false)}
+                    className="md:hidden p-2 text-slate-400 hover:text-white rounded-xl hover:bg-white/10 transition-colors"
+                >
+                    <X size={18} />
+                </button>
+            </div>
 
             <div className="relative mb-4">
                 <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-slate-500">

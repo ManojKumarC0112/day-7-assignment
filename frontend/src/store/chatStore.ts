@@ -47,6 +47,9 @@ interface ChatState {
 
     sendMessage: (text: string, file: File | null) => Promise<void>;
     clearChat: () => void;
+
+    sidebarOpen: boolean;
+    setSidebarOpen: (sidebarOpen: boolean) => void;
 }
 
 const API_BASE = 'http://localhost:8000';
@@ -60,6 +63,9 @@ export const useChatStore = create<ChatState>((set, get) => ({
     selectedProvider: 'groq',
     selectedModel: 'llama-3.3-70b-versatile',
     compareMode: false,
+    sidebarOpen: false,
+
+    setSidebarOpen: (sidebarOpen) => set({ sidebarOpen }),
 
     setProvider: (provider) => {
         let defaultModel = 'llama-3.3-70b-versatile';

@@ -5,7 +5,7 @@ import { useChatStore } from './store/chatStore';
 
 function App() {
   const fetchConversations = useChatStore(state => state.fetchConversations);
-  const { glassBlur, glassOpacity, hasGlow, isLight } = useChatStore();
+  const { glassBlur, glassOpacity, hasGlow, isLight, sidebarOpen, setSidebarOpen } = useChatStore();
 
   useEffect(() => {
     fetchConversations();
@@ -37,6 +37,14 @@ function App() {
           <div className="absolute top-[-10%] left-[-10%] w-[500px] h-[500px] bg-indigo-500/5 rounded-full blur-[120px] pointer-events-none" />
           <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] bg-sky-500/5 rounded-full blur-[150px] pointer-events-none" />
         </>
+      )}
+
+      {/* Mobile Drawer Overlay Backdrop */}
+      {sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 md:hidden animate-fade-in"
+          onClick={() => setSidebarOpen(false)}
+        />
       )}
 
       <Sidebar />
