@@ -12,6 +12,8 @@ class MessageCreate(MessageBase):
 class MessageResponse(MessageBase):
     id: int
     conversation_id: int
+    provider: Optional[str] = None
+    model: Optional[str] = None
     timestamp: datetime
 
     class Config:

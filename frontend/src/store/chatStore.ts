@@ -5,6 +5,8 @@ export interface Message {
     id: number;
     role: 'user' | 'assistant';
     content: string;
+    provider?: string;
+    model?: string;
 }
 
 export interface Conversation {
@@ -18,6 +20,14 @@ interface ChatState {
     currentConversationId: number | null;
     messages: Message[];
     isGenerating: boolean;
+
+    selectedProvider: 'gemini' | 'groq' | 'nvidia';
+    selectedModel: string;
+    compareMode: boolean;
+
+    setProvider: (provider: 'gemini' | 'groq' | 'nvidia') => void;
+    setModel: (model: string) => void;
+    setCompareMode: (compareMode: boolean) => void;
 
     glassBlur: number;
     glassOpacity: number;
@@ -46,6 +56,19 @@ export const useChatStore = create<ChatState>((set, get) => ({
     currentConversationId: null,
     messages: [],
     isGenerating: false,
+
+    selectedProvider: 'groq',
+    selectedModel: 'llama-3.3-70b-versatile',
+    compareMode: false,
+
+    setProvider: (provider) => {
+        let defaultModel = 'llama-3.3-70b-versatile';
+        if (provider === 'gemini') defaultModel = 'gemini-2.5-flash';
+        if (provider === 'nvidia') defaultModel = 'nvidia/nemotron-3-nano-omni-30b-a3b-reasoning';
+        set({ selectedProvider: provider, selectedModel: defaultModel });
+    },
+    setModel: (selectedModel) => set({ selectedModel }),
+    setCompareMode: (compareMode) => set({ compareMode }),
 
     glassBlur: Number(localStorage.getItem('glassBlur') || '16'),
     glassOpacity: Number(localStorage.getItem('glassOpacity') || '10'),
@@ -145,11 +168,11 @@ export const useChatStore = create<ChatState>((set, get) => ({
     },
 
     sendMessage: async (text: string, file: File | null) => {
-        const { currentConversationId, messages } = get();
+        const { currentConversationId, messages, selectedProvider, selectedModel, compareMode } = get();
 
         // Optimistic UI update
-        const userMessage: Message = { id: Date.now(), role: 'user', content: text };
-        const assistantMessage: Message = { id: Date.now() + 1, role: 'assistant', content: '' };
+        const userMessage: Message = { id: Date.now(), role: 'user', content: text, provider: selectedProvider, model: selectedModel };
+        const assistantMessage: Message = { id: Date.now() + 1, role: 'assistant', content: '', provider: compareMode ? 'comparison' : selectedProvider, model: compareMode ? 'parallel-trio' : selectedModel };
 
         set({
             messages: [...messages, userMessage, assistantMessage],
@@ -158,6 +181,12 @@ export const useChatStore = create<ChatState>((set, get) => ({
 
         const formData = new FormData();
         formData.append('message', text);
+        formData.append('provider', selectedProvider);
+        if (selectedModel) {
+            formData.append('model', selectedModel);
+        }
+        formData.append('compare_mode', compareMode ? 'true' : 'false');
+
         if (currentConversationId) {
             formData.append('conversation_id', currentConversationId.toString());
         }
@@ -194,6 +223,13 @@ export const useChatStore = create<ChatState>((set, get) => ({
                         } else if (data.type === 'chunk' && data.content) {
                             fullContent += data.content;
                             // Update last message
+                            set((state) => {
+                                const currentMsgs = [...state.messages];
+                                currentMsgs[currentMsgs.length - 1].content = fullContent;
+                                return { messages: currentMsgs };
+                            });
+                        } else if (data.type === 'compare' && data.results) {
+                            fullContent = JSON.stringify(data.results);
                             set((state) => {
                                 const currentMsgs = [...state.messages];
                                 currentMsgs[currentMsgs.length - 1].content = fullContent;

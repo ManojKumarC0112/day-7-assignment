@@ -19,6 +19,8 @@ class Message(Base):
     conversation_id = Column(Integer, ForeignKey("conversations.id"))
     role = Column(String)  # 'user' or 'assistant'
     content = Column(Text)
+    provider = Column(String, nullable=True)
+    model = Column(String, nullable=True)
     timestamp = Column(DateTime, default=datetime.utcnow)
 
     conversation = relationship("Conversation", back_populates="messages")

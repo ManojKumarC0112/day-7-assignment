@@ -5,7 +5,18 @@ import ChatInput from './ChatInput';
 import { Sparkles, Trash2, Download, FileJson, FileText, ArrowRight } from 'lucide-react';
 
 export default function ChatWindow() {
-    const { messages, conversations, currentConversationId, deleteConversation, sendMessage, isLight } = useChatStore();
+    const {
+        messages,
+        conversations,
+        currentConversationId,
+        deleteConversation,
+        sendMessage,
+        isLight,
+        selectedProvider,
+        compareMode,
+        setProvider,
+        setCompareMode
+    } = useChatStore();
     const scrollContainerRef = useRef<HTMLDivElement>(null);
     const [showExportMenu, setShowExportMenu] = useState(false);
 
@@ -89,21 +100,69 @@ export default function ChatWindow() {
         <div className={`flex flex-col h-full relative z-10 w-full transition-colors duration-350 ${isLight ? 'bg-slate-100/30 text-slate-800' : 'bg-nova-dark/40 text-slate-200'
             }`}>
             {/* Elegant Header */}
-            <header className={`flex items-center justify-between px-6 py-4 border-b transition-colors duration-300 ${isLight ? 'border-slate-250 bg-slate-100/50 backdrop-blur-md' : 'border-white/5 bg-white/2 backdrop-blur-md'
+            <header className={`flex items-center justify-between px-6 py-4 border-b flex-wrap gap-4 transition-colors duration-300 ${isLight ? 'border-slate-250 bg-slate-100/50 backdrop-blur-md' : 'border-white/5 bg-white/2 backdrop-blur-md'
                 }`}>
-                <div className="flex flex-col min-w-0 pr-4">
+                <div className="flex flex-col min-w-0">
                     <div className="flex items-center gap-2.5">
-                        <h2 className={`text-sm font-semibold truncate ${isLight ? 'text-slate-800' : 'text-white'}`}>
+                        <h2 className={`text-sm font-bold truncate ${isLight ? 'text-slate-800' : 'text-white'}`}>
                             {activeTitle}
                         </h2>
-                        <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[9px] font-bold border transition-colors ${isLight
-                            ? 'bg-emerald-100 text-emerald-800 border-emerald-200'
-                            : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20'
-                            }`}>
-                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-450 bg-emerald-400 animate-pulse" />
-                            llama-3.1-8b-instant
-                        </span>
                     </div>
+                </div>
+
+                {/* Model Selector Bar */}
+                <div className="flex flex-wrap items-center gap-4 text-xs">
+                    {/* Compare Checkbox */}
+                    <label className={`flex items-center gap-2 font-medium cursor-pointer py-1.5 px-3 rounded-xl transition-all ${isLight ? 'hover:bg-slate-200/50 text-slate-650' : 'hover:bg-white/5 text-slate-300'
+                        }`}>
+                        <input
+                            type="checkbox"
+                            checked={compareMode}
+                            onChange={(e) => setCompareMode(e.target.checked)}
+                            className="rounded border-white/20 text-nova-accent focus:ring-nova-accent/30"
+                        />
+                        <span className="flex items-center gap-1">⭐ Compare Models</span>
+                    </label>
+
+                    {!compareMode && (
+                        <>
+                            {/* Provider Select */}
+                            <div className="flex items-center gap-1.5">
+                                <span className={`font-semibold uppercase text-[9px] tracking-wider ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>Provider</span>
+                                <select
+                                    value={selectedProvider}
+                                    onChange={(e) => setProvider(e.target.value as any)}
+                                    className={`px-3 py-1.5 border rounded-xl text-xs font-semibold outline-none cursor-pointer transition-all ${isLight
+                                        ? 'bg-slate-200/80 border-slate-350 text-slate-800 focus:border-slate-500'
+                                        : 'bg-white/5 border-white/10 text-slate-200 focus:border-nova-accent/40'
+                                        }`}
+                                >
+                                    <option value="gemini">Gemini</option>
+                                    <option value="groq">Groq</option>
+                                    <option value="nvidia">NVIDIA</option>
+                                </select>
+                            </div>
+
+                            {/* Model Badge */}
+                            <div className="flex items-center gap-1.5">
+                                <span className={`font-semibold uppercase text-[9px] tracking-wider ${isLight ? 'text-slate-500' : 'text-slate-400'}`}>Model</span>
+                                <span className={`px-3 py-1.5 border rounded-xl text-xs font-semibold select-none ${isLight
+                                    ? 'bg-slate-200/50 border-slate-350 text-slate-700'
+                                    : 'bg-white/5 border-white/10 text-slate-300'
+                                    }`}>
+                                    {selectedProvider === 'gemini' && 'Gemini 2.5 Flash'}
+                                    {selectedProvider === 'groq' && 'Llama 3.3 70B'}
+                                    {selectedProvider === 'nvidia' && 'Nemotron 51B'}
+                                </span>
+                            </div>
+                        </>
+                    )}
+
+                    {compareMode && (
+                        <div className="flex items-center gap-1.5 text-nova-accent font-bold bg-nova-accent/15 px-3 py-1.5 rounded-xl border border-nova-accent/25">
+                            ⚔️ Compare: Gemini, Groq & NIM
+                        </div>
+                    )}
                 </div>
 
                 {currentConversationId && (
@@ -206,7 +265,7 @@ export default function ChatWindow() {
                 ) : (
                     <div className="flex flex-col pb-6 max-w-4xl mx-auto w-full">
                         {messages.map((msg, index) => (
-                            <MessageBubble key={index} message={msg} />
+                            <MessageBubble key={index} message={msg} isLast={index === messages.length - 1} />
                         ))}
                     </div>
                 )}
