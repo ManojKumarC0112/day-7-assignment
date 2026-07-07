@@ -19,7 +19,17 @@ interface ChatState {
     messages: Message[];
     isGenerating: boolean;
 
+    glassBlur: number;
+    glassOpacity: number;
+    hasGlow: boolean;
+    isLight: boolean;
+    setGlassBlur: (v: number) => void;
+    setGlassOpacity: (v: number) => void;
+    setHasGlow: (v: boolean) => void;
+    setIsLight: (v: boolean) => void;
+
     fetchConversations: () => Promise<void>;
+    searchConversations: (query: string) => Promise<void>;
     setCurrentConversation: (id: number | null) => void;
     deleteConversation: (id: number) => Promise<void>;
 
@@ -35,9 +45,45 @@ export const useChatStore = create<ChatState>((set, get) => ({
     messages: [],
     isGenerating: false,
 
+    glassBlur: Number(localStorage.getItem('glassBlur') || '16'),
+    glassOpacity: Number(localStorage.getItem('glassOpacity') || '10'),
+    hasGlow: localStorage.getItem('hasGlow') !== 'false',
+    isLight: localStorage.getItem('isLight') === 'true',
+
+    setGlassBlur: (glassBlur) => {
+        localStorage.setItem('glassBlur', glassBlur.toString());
+        set({ glassBlur });
+    },
+    setGlassOpacity: (glassOpacity) => {
+        localStorage.setItem('glassOpacity', glassOpacity.toString());
+        set({ glassOpacity });
+    },
+    setHasGlow: (hasGlow) => {
+        localStorage.setItem('hasGlow', hasGlow.toString());
+        set({ hasGlow });
+    },
+    setIsLight: (isLight) => {
+        localStorage.setItem('isLight', isLight.toString());
+        set({ isLight });
+    },
+
     fetchConversations: async () => {
         try {
             const res = await axios.get(`${API_BASE}/history`);
+            set({ conversations: res.data });
+        } catch (err) {
+            console.error(err);
+        }
+    },
+
+    searchConversations: async (query: string) => {
+        if (!query.trim()) {
+            const res = await axios.get(`${API_BASE}/history`);
+            set({ conversations: res.data });
+            return;
+        }
+        try {
+            const res = await axios.get(`${API_BASE}/history/search?q=${encodeURIComponent(query)}`);
             set({ conversations: res.data });
         } catch (err) {
             console.error(err);

@@ -1,6 +1,7 @@
 import { useState, useRef } from 'react';
-import { Send, FileUp, X } from 'lucide-react';
+import { Send, FileUp, X, Mic, Square } from 'lucide-react';
 import { useChatStore } from '../store/chatStore';
+import axios from 'axios';
 
 export default function ChatInput() {
     const [text, setText] = useState('');
@@ -8,7 +9,62 @@ export default function ChatInput() {
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    const [isRecording, setIsRecording] = useState(false);
+    const [isTranscribing, setIsTranscribing] = useState(false);
+    const mediaRecorderRef = useRef<MediaRecorder | null>(null);
+    const audioChunksRef = useRef<Blob[]>([]);
+
     const { sendMessage, isGenerating } = useChatStore();
+
+    const startRecording = async () => {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            const mediaRecorder = new MediaRecorder(stream);
+            mediaRecorderRef.current = mediaRecorder;
+            audioChunksRef.current = [];
+
+            mediaRecorder.ondataavailable = (event) => {
+                if (event.data.size > 0) {
+                    audioChunksRef.current.push(event.data);
+                }
+            };
+
+            mediaRecorder.onstop = async () => {
+                const audioBlob = new Blob(audioChunksRef.current, { type: 'audio/webm' });
+                setIsTranscribing(true);
+                const formData = new FormData();
+                formData.append('file', audioBlob, 'speech.webm');
+                try {
+                    const res = await axios.post('http://localhost:8000/chat/transcribe', formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data'
+                        }
+                    });
+                    if (res.data && res.data.text) {
+                        setText((prev) => prev ? prev + ' ' + res.data.text : res.data.text);
+                    }
+                } catch (err) {
+                    console.error("Transcription failed", err);
+                } finally {
+                    setIsTranscribing(false);
+                }
+                stream.getTracks().forEach(track => track.stop());
+            };
+
+            mediaRecorder.start();
+            setIsRecording(true);
+        } catch (err) {
+            console.error("Failed to access microphone", err);
+            alert("Failed to grab microphone stream. Please confirm permission settings in your browser.");
+        }
+    };
+
+    const stopRecording = () => {
+        if (mediaRecorderRef.current && isRecording) {
+            mediaRecorderRef.current.stop();
+            setIsRecording(false);
+        }
+    };
 
     const handleSend = () => {
         if (!text.trim() && !file) return;
@@ -87,6 +143,19 @@ export default function ChatInput() {
                         <FileUp size={20} />
                     </button>
 
+                    <button
+                        type="button"
+                        onClick={isRecording ? stopRecording : startRecording}
+                        className={`p-3 rounded-xl transition-all duration-200 ${isRecording
+                                ? 'bg-red-500/20 text-red-400 border border-red-500/30 animate-pulse-subtle'
+                                : 'text-slate-400 hover:text-white hover:bg-white/10'
+                            }`}
+                        disabled={isTranscribing}
+                        title={isRecording ? "Stop Recording" : "Voice Input"}
+                    >
+                        {isRecording ? <Square size={20} className="fill-red-400" /> : <Mic size={20} />}
+                    </button>
+
                     <input
                         type="file"
                         ref={fileInputRef}
@@ -100,14 +169,22 @@ export default function ChatInput() {
                     value={text}
                     onChange={(e) => setText(e.target.value)}
                     onKeyDown={handleKeyDown}
-                    placeholder={isGenerating ? "Nova AI is typing..." : "Message Nova AI..."}
-                    disabled={isGenerating}
+                    placeholder={
+                        isTranscribing
+                            ? "Transcribing voice message..."
+                            : isRecording
+                                ? "Listening... click square button to finish."
+                                : isGenerating
+                                    ? "Nova AI is typing..."
+                                    : "Message Nova AI..."
+                    }
+                    disabled={isGenerating || isTranscribing}
                     className="flex-1 max-h-48 min-h-[52px] bg-transparent resize-none outline-none py-3 px-2 text-slate-200 placeholder:text-slate-500 disabled:opacity-50"
                     rows={1}
                 />
 
                 <button
-                    disabled={isGenerating || (!text.trim() && !file)}
+                    disabled={isGenerating || isTranscribing || (!text.trim() && !file)}
                     onClick={handleSend}
                     className="p-3 mb-1 bg-nova-accent text-nova-dark hover:bg-sky-300 disabled:bg-white/10 disabled:text-slate-500 rounded-xl transition-colors shadow-lg"
                 >

@@ -53,4 +53,16 @@ class GroqService(AIService):
         except Exception:
             return "New Chat"
 
+    async def transcribe_audio(self, file_bytes: bytes, file_name: str) -> str:
+        try:
+            transcription = await self.client.audio.transcriptions.create(
+                file=(file_name, file_bytes),
+                model="whisper-large-v3-turbo",
+                response_format="json"
+            )
+            return transcription.text
+        except Exception as e:
+            logger.error(f"Groq Audio Transcription Error: {str(e)}")
+            raise e
+
 groq_service = GroqService()

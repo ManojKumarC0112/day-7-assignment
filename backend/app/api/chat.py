@@ -107,3 +107,12 @@ async def unified_chatEndpoint(
         db.commit()
 
     return StreamingResponse(generate(), media_type="text/event-stream")
+
+@router.post("/transcribe")
+async def transcribe_audio_endpoint(file: UploadFile = File(...)):
+    try:
+        file_bytes = await file.read()
+        text = await groq_service.transcribe_audio(file_bytes, file.filename)
+        return {"text": text}
+    except Exception as e:
+        return {"error": str(e)}
