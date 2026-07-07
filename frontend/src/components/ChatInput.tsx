@@ -1,0 +1,119 @@
+import { useState, useRef } from 'react';
+import { Send, FileUp, X } from 'lucide-react';
+import { useChatStore } from '../store/chatStore';
+
+export default function ChatInput() {
+    const [text, setText] = useState('');
+    const [file, setFile] = useState<File | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
+
+    const { sendMessage, isGenerating } = useChatStore();
+
+    const handleSend = () => {
+        if (!text.trim() && !file) return;
+        sendMessage(text, file);
+        setText('');
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+            setPreviewUrl(null);
+        }
+        setFile(null);
+    };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+            e.preventDefault();
+            handleSend();
+        }
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            const selectedFile = e.target.files[0];
+            setFile(selectedFile);
+            if (selectedFile.type.startsWith('image/')) {
+                setPreviewUrl(URL.createObjectURL(selectedFile));
+            } else {
+                setPreviewUrl(null);
+            }
+        }
+    };
+
+    const handleRemoveFile = () => {
+        if (previewUrl) {
+            URL.revokeObjectURL(previewUrl);
+            setPreviewUrl(null);
+        }
+        setFile(null);
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
+
+    return (
+        <div className="p-4 md:px-8 pb-8 relative">
+            {file && (
+                <div className="absolute -top-20 left-8 bg-nova-dark/95 px-4 py-3 rounded-2xl border border-white/10 flex items-center gap-3 animate-fade-in shadow-2xl backdrop-blur-md max-w-xs">
+                    {previewUrl ? (
+                        <div className="h-12 w-12 rounded-lg overflow-hidden border border-white/10 bg-white/5 flex-shrink-0">
+                            <img src={previewUrl} alt="Preview" className="h-full w-full object-cover" />
+                        </div>
+                    ) : (
+                        <div className="h-10 w-10 rounded-lg bg-nova-accent/10 border border-nova-accent/20 flex items-center justify-center flex-shrink-0 text-nova-accent">
+                            <FileUp size={18} />
+                        </div>
+                    )}
+                    <div className="flex flex-col min-w-0 pr-2">
+                        <span className="text-xs font-semibold text-slate-300 truncate">{file.name}</span>
+                        <span className="text-[10px] text-slate-500">{(file.size / 1024).toFixed(1)} KB</span>
+                    </div>
+                    <button
+                        onClick={handleRemoveFile}
+                        className="text-slate-400 hover:text-white p-1 hover:bg-white/10 rounded-full transition-colors self-start"
+                    >
+                        <X size={14} />
+                    </button>
+                </div>
+            )}
+
+            <div className="bg-white/5 border border-white/10 rounded-2xl p-2 shadow-2xl relative flex items-end gap-2 backdrop-blur-xl">
+                <div className="flex gap-1 pb-1">
+                    <button
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="p-3 text-slate-400 hover:text-white hover:bg-white/10 rounded-xl transition-colors"
+                    >
+                        <FileUp size={20} />
+                    </button>
+
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        className="hidden"
+                        onChange={handleFileChange}
+                        accept=".pdf,.txt,.docx,image/*"
+                    />
+                </div>
+
+                <textarea
+                    value={text}
+                    onChange={(e) => setText(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    placeholder={isGenerating ? "Nova AI is typing..." : "Message Nova AI..."}
+                    disabled={isGenerating}
+                    className="flex-1 max-h-48 min-h-[52px] bg-transparent resize-none outline-none py-3 px-2 text-slate-200 placeholder:text-slate-500 disabled:opacity-50"
+                    rows={1}
+                />
+
+                <button
+                    disabled={isGenerating || (!text.trim() && !file)}
+                    onClick={handleSend}
+                    className="p-3 mb-1 bg-nova-accent text-nova-dark hover:bg-sky-300 disabled:bg-white/10 disabled:text-slate-500 rounded-xl transition-colors shadow-lg"
+                >
+                    <Send size={20} />
+                </button>
+            </div>
+        </div>
+    );
+}

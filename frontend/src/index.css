@@ -1,0 +1,45 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  margin: 0;
+  padding: 0;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+}
+
+body {
+  @apply bg-nova-dark text-slate-200 antialiased font-sans relative;
+}
+
+/* Gradient background blob for premium aesthetic */
+body::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: radial-gradient(circle at center, rgba(56, 189, 248, 0.05) 0%, rgba(15, 23, 42, 0) 50%);
+  z-index: -1;
+  pointer-events: none;
+}
+
+@layer utilities {
+  .glass-panel {
+    @apply bg-nova-card backdrop-blur-xl border border-nova-border shadow-2xl;
+  }
+
+  .scrollbar-hide::-webkit-scrollbar {
+    display: none;
+  }
+
+  .scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
